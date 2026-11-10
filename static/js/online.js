@@ -30,6 +30,10 @@
   }
 
   async function request(path, { method = 'GET', body, timeout = TIMEOUT_MS } = {}) {
+    if (navigator.onLine === false) {
+      throw new Error('offline');
+    }
+
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeout);
 
