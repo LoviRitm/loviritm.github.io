@@ -7,13 +7,14 @@
    обновлением.
    ============================================================ */
 
-const CACHE = 'loviritm-v23';
+const CACHE = 'loviritm-v24';
 const ASSETS = [
   '/',
   '/records.html',
   '/manifest.json',
   '/scores.json',
   '/static/css/app.css',
+  '/static/js/online.js',
   '/static/js/site.js',
   '/static/js/voice-gate.js',
   '/static/js/mic.js',
