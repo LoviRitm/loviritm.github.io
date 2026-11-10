@@ -86,22 +86,71 @@ function mergeScores(staticItems, localItems) {
   return sortItems(merged);
 }
 
+function normalizeOnline(row) {
+  const created = row?.created_at ? new Date(row.created_at) : null;
+  const valid = created && !Number.isNaN(created.getTime());
+  return {
+    id: row?.id || '',
+    name: row?.name || 'Аноним',
+    score: Number(row?.score) || 0,
+    dev: row?.dev == null ? null : Number(row.dev),
+    taps: row?.taps == null ? null : Number(row.taps),
+    mode: row?.mode || 'tap',
+    beats: Array.isArray(row?.beats) ? row.beats : [],
+    ts: valid ? created.getTime() / 1000 : null,
+    when: valid ? created.toLocaleDateString('ru-RU') : '',
+    online: true,
+  };
+}
+
+function saveLocal(entry) {
+  const items = sortItems(readLocal());
+  items.push(entry);
+  sortItems(items);
+  const trimmed = items.slice(0, MAX_STORED);
+  writeLocal(trimmed);
+  return { ok: true, entry, scores: trimmed.slice(0, TOP_N) };
+}
+
 const ScoreStore = {
   // limit = 0 — вернуть весь рейтинг.
   async list(limit = 0) {
+    const online = window.LoviRitmOnline;
+    if (online) {
+      try {
+        const rows = await online.getLeaderboard(limit > 0 ? limit : 200);
+        const scores = rows.map(normalizeOnline);
+        return { scores, total: scores.length, online: true };
+      } catch (err) {
+        console.warn('Онлайн-рейтинг недоступен:', err);
+      }
+    }
+
     const query = limit > 0 ? `?limit=${encodeURIComponent(limit)}` : '';
     if (!IS_APP) {
       try {
         const res = await fetch(`/api/scores${query}`, { headers: { Accept: 'application/json' } });
-        if (res.ok) return await res.json();
+        if (res.ok) {
+          const data = await res.json();
+          return { ...data, online: false };
+        }
       } catch {}
     }
     const items = mergeScores(await readStaticScores(), readLocal());
     const scores = limit > 0 ? items.slice(0, limit) : items;
-    return { scores, total: items.length };
+    return { scores, total: items.length, online: false };
   },
 
   async stats() {
+    const online = window.LoviRitmOnline;
+    if (online?.getStats) {
+      try {
+        return await online.getStats();
+      } catch (err) {
+        console.warn('Статистика онлайн-рейтинга недоступна:', err);
+      }
+    }
+
     if (!IS_APP) {
       try {
         const res = await fetch('/api/stats', { headers: { Accept: 'application/json' } });
@@ -119,6 +168,8 @@ const ScoreStore = {
   },
 
   async save(entry) {
+    let result = null;
+
     if (!IS_APP) {
       try {
         const res = await fetch('/api/scores', {
@@ -126,16 +177,30 @@ const ScoreStore = {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(entry),
         });
-        if (res.ok) return await res.json();
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.ok !== false) result = data;
+        }
       } catch {}
     }
 
-    const items = sortItems(readLocal());
-    items.push(entry);
-    sortItems(items);
-    const trimmed = items.slice(0, MAX_STORED);
-    writeLocal(trimmed);
-    return { ok: true, entry, scores: trimmed.slice(0, TOP_N) };
+    if (!result) result = saveLocal(entry);
+
+    const online = window.LoviRitmOnline;
+    if (online) {
+      try {
+        await online.submitScore(entry);
+        result.online = true;
+      } catch (err) {
+        result.online = false;
+        result.onlineError = String(err?.message || err);
+        console.warn('Не удалось отправить результат онлайн:', err);
+      }
+    } else {
+      result.online = false;
+    }
+
+    return result;
   },
 };
 
@@ -187,6 +252,15 @@ async function loadRecordsPage() {
     const data = await ScoreStore.list();
     items = Array.isArray(data.scores) ? data.scores : [];
 
+    const source = $('#recordsSource');
+    if (source) {
+      const localOnly = data.online === false;
+      source.hidden = !localOnly;
+      source.textContent = localOnly
+        ? 'Онлайн-рейтинг сейчас недоступен — показаны записи, сохранённые на этом устройстве.'
+        : '';
+    }
+
     if (!items.length) {
       body.innerHTML = `
         <tr><td colspan="7">
@@ -209,8 +283,13 @@ async function loadRecordsPage() {
         <td class="num">${escapeHtml(item.when || '')}</td>
       </tr>`).join('');
   } catch {
+    const source = $('#recordsSource');
+    if (source) {
+      source.hidden = false;
+      source.textContent = 'Онлайн-рейтинг сейчас недоступен. Попробуйте обновить страницу позже.';
+    }
     body.innerHTML = `
-      <tr><td colspan="7">Не удалось загрузить таблицу. Проверьте, что сервер запущен.</td></tr>`;
+      <tr><td colspan="7">Не удалось загрузить таблицу. Проверьте подключение к интернету.</td></tr>`;
   }
 }
 

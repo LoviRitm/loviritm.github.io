@@ -656,7 +656,7 @@ async function saveScore(ev) {
     taps: r.hit,
     mode: state.input,
     // Отклонения по каждому удару — для графика в карточке игрока.
-    beats: r.rows.map((row) => (row.dev == null ? null : Math.round(row.dev * 10) / 10)),
+    beats: r.rows.map((row) => (row.dev == null ? null : Math.round(row.dev * 1000) / 1000)),
     ts: now.getTime() / 1000,
     when: now.toLocaleDateString('ru-RU'),
   };
@@ -664,7 +664,9 @@ async function saveScore(ev) {
   try {
     const res = await window.ScoreStore.save(entry);
     if (!res.ok) throw new Error('save failed');
-    $('saveMsg').textContent = 'Сохранено! Загляните в «Таблицу рекордов».';
+    $('saveMsg').textContent = res.online
+      ? 'Сохранено! Результат в общем онлайн-рейтинге.'
+      : 'Сохранено на устройстве. Онлайн-рейтинг сейчас недоступен.';
   } catch {
     $('saveMsg').classList.add('is-error');
     $('saveMsg').textContent = 'Не удалось сохранить.';
