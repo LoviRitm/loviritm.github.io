@@ -69,10 +69,12 @@ const state = {
   tapOffset: 0,        // постоянное запаздывание/опережение в кликовой фазе
   score: null,
   input: 'tap',        // tap | voice
+  paused: false,       // вкладка/приложение свёрнуто — тест заморожен
 };
 
 let starting = false;
 let startToken = 0;
+let resumeToken = 0;
 
 /* ------------------------------------------------------------ */
 /*  Экраны                                                      */
@@ -182,7 +184,7 @@ function kick(time, accent) {
 /* ------------------------------------------------------------ */
 
 function schedule() {
-  if (state.mode !== 'running') return;
+  if (state.mode !== 'running' || state.paused) return;
 
   const ctx = state.ctx;
   const horizon = ctx.currentTime + 0.2;
@@ -212,7 +214,7 @@ function schedule() {
 }
 
 function frame() {
-  if (state.mode !== 'running') return;
+  if (state.mode !== 'running' || state.paused) return;
 
   const now = audioNow();
   while (state.vis.length && state.startAt + state.vis[0] * BEAT <= now) {
@@ -299,7 +301,7 @@ function ripple() {
 /* ------------------------------------------------------------ */
 
 function tapAt(t) {
-  if (state.mode !== 'running') return;
+  if (state.mode !== 'running' || state.paused) return;
 
   // Сначала оцениваем постоянное смещение по кликовой фазе: если
   // человек стабильно говорит на 150–250 мс позже клика, жёсткое
@@ -331,6 +333,10 @@ function tapAt(t) {
 
 function handleTap(ev) {
   if (state.mode !== 'running') return;
+  if (state.paused) {
+    resume(true);
+    return;
+  }
 
   const stamp = ev && ev.timeStamp ? ev.timeStamp : performance.now();
   const lag = clamp((performance.now() - stamp) / 1000, 0, 0.08);
@@ -393,8 +399,10 @@ async function start() {
   }
 
   stopTimers();
+  clearResume();
 
   state.mode = 'running';
+  state.paused = false;
   state.startAt = ctx.currentTime + 0.35;
   state.scheduled = 0;
   state.beats = [];
@@ -433,6 +441,10 @@ async function start() {
   schedule();
   cancelAnimationFrame(state.raf);
   state.raf = requestAnimationFrame(frame);
+
+  // Если вкладку свернули, пока включался микрофон, не запускаем
+  // тест в фоне: сразу замораживаем его до возвращения.
+  if (document.hidden) pause();
 }
 
 function micErrorText(err) {
@@ -466,10 +478,104 @@ function stopTimers() {
   state.endTimer = null;
 }
 
+function clearResume() {
+  resumeToken += 1;
+}
+
+function wait(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function pause() {
+  if (state.mode !== 'running') return;
+
+  clearResume();
+
+  if (state.paused) {
+    stopTimers();
+    return;
+  }
+
+  state.paused = true;
+  stopTimers();
+  if (window.MicInput && MicInput.pause) MicInput.pause();
+  if (state.ctx && state.ctx.state === 'running') {
+    state.ctx.suspend().catch(() => {});
+  }
+
+  setStage({
+    kicker: 'Пауза',
+    main: '',
+    sub: 'Тест приостановлен. Вернитесь на вкладку, чтобы продолжить.',
+    silent: true,
+  });
+}
+
+function showResumePrompt() {
+  setStage({
+    kicker: 'Пауза',
+    main: 'Продолжить',
+    sub: 'Нажмите, чтобы вернуться в тест',
+    silent: true,
+  });
+}
+
+function startRunLoop() {
+  state.paused = false;
+  if (window.MicInput && MicInput.resume) MicInput.resume();
+  state.schedTimer = setInterval(schedule, 25);
+  schedule();
+  cancelAnimationFrame(state.raf);
+  state.raf = requestAnimationFrame(frame);
+}
+
+async function resume(fromGesture = false) {
+  if (state.mode !== 'running' || !state.paused) return;
+
+  const ctx = state.ctx;
+  if (!ctx) return;
+
+  const token = ++resumeToken;
+
+  // После сворачивания звук ставим на паузу. Пока идёт обратный
+  // отсчёт, контекст остаётся замороженным, поэтому ни один удар
+  // не «убегает» и запись не теряется.
+  if (ctx.state === 'running') {
+    try { await ctx.suspend(); } catch {}
+  }
+
+  if (!fromGesture) {
+    for (const n of ['3', '2', '1']) {
+      if (token !== resumeToken || state.mode !== 'running') return;
+      setStage({
+        kicker: 'Продолжаем',
+        main: n,
+        sub: 'Тот же темп, с того же места',
+        silent: true,
+      });
+      await wait(350);
+    }
+  }
+
+  if (token !== resumeToken || state.mode !== 'running') return;
+
+  try { await ctx.resume(); } catch {}
+  if (token !== resumeToken || state.mode !== 'running') return;
+
+  if (ctx.state !== 'running') {
+    showResumePrompt();
+    return;
+  }
+
+  startRunLoop();
+}
+
 function abort() {
+  clearResume();
   stopTimers();
   startToken += 1;
   starting = false;
+  state.paused = false;
   if (window.MicInput) MicInput.disable();
   state.mode = 'idle';
 
@@ -485,9 +591,11 @@ function abort() {
 
 // «Пройти ещё раз» — снова показываем выбор режима, а не запускаем сразу.
 function backToStart() {
+  clearResume();
   stopTimers();
   startToken += 1;
   starting = false;
+  state.paused = false;
   if (window.MicInput) MicInput.disable();
   state.mode = 'idle';
   showScreen('start');
@@ -516,7 +624,9 @@ function setButtons() {
 /* ------------------------------------------------------------ */
 
 function finish() {
+  clearResume();
   stopTimers();
+  state.paused = false;
   if (window.MicInput) MicInput.disable();
   state.mode = 'done';
 
@@ -729,7 +839,7 @@ $('saveForm').addEventListener('submit', saveScore);
 
 $('stage').addEventListener('pointerdown', (ev) => {
   ev.preventDefault();
-  if (state.mode === 'running' && state.input === 'voice') return;
+  if (state.mode === 'running' && state.input === 'voice' && !state.paused) return;
   handleTap(ev);
 });
 
@@ -745,6 +855,10 @@ document.addEventListener('keydown', (ev) => {
   if (ev.repeat) return;
 
   if (state.mode === 'running') {
+    if (state.paused) {
+      resume(true);
+      return;
+    }
     if (state.input !== 'voice') handleTap(ev);
     return;
   }
@@ -753,15 +867,20 @@ document.addEventListener('keydown', (ev) => {
 });
 
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden && state.mode === 'running') abort();
+  if (document.hidden) {
+    if (state.mode === 'running') pause();
+    return;
+  }
+
+  if (state.mode === 'running' && state.paused) resume();
 });
 
 window.addEventListener('pagehide', () => {
-  if (window.MicInput) MicInput.disable();
+  if (state.mode === 'running') pause();
 });
 
 window.addEventListener('pageshow', () => {
-  if (state.mode === 'running') abort();
+  if (state.mode === 'running' && state.paused) resume();
 });
 
 window.addEventListener('resize', () => {

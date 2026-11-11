@@ -232,6 +232,18 @@ function tick() {
   st.gate.push(broad, low, now);
 }
 
+function pause() {
+  clearInterval(st.timer);
+  st.timer = null;
+}
+
+function resume() {
+  if (!st.active || !st.anBroad || !st.gate) return false;
+  clearInterval(st.timer);
+  st.timer = setInterval(tick, POLL_MS);
+  return true;
+}
+
 function disable() {
   clearInterval(st.timer);
   st.timer = null;
@@ -289,6 +301,8 @@ function disable() {
 window.MicInput = {
   enable,
   start,
+  pause,
+  resume,
   disable,
   get active() {
     return st.active;
