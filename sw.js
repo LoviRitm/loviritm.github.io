@@ -7,7 +7,7 @@
    обновлением.
    ============================================================ */
 
-const CACHE = 'loviritm-v25';
+const CACHE = 'loviritm-v60';
 const ASSETS = [
   '/',
   '/records.html',
@@ -20,8 +20,17 @@ const ASSETS = [
   '/static/js/mic.js',
   '/static/js/test.js',
   '/static/img/favicon.svg',
+  '/static/img/favicon-32.png',
+  '/static/img/apple-touch-icon.png',
+  '/static/img/icon-192.png',
+  '/static/img/icon-512.png',
   '/static/img/note.svg',
   '/static/img/staff.svg',
+  '/static/img/bg-geometry.svg',
+  '/static/fonts/montserrat-cyrillic.woff2',
+  '/static/fonts/montserrat-latin.woff2',
+  '/static/img/mode-tap.jpg',
+  '/static/img/mode-voice.jpg',
 ];
 
 self.addEventListener('install', (event) => {

@@ -5,18 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Лови Ритм — проверь чувство ритма</title>
   <meta name="description" content="20 секунд: тапай или говори «та» в такт клику, а когда звук выключится — держи темп сам. Честная шкала до 1000 баллов.">
-  <meta name="theme-color" content="#0b0d12">
+  <meta name="theme-color" content="#0b0f18">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="icon" href="/static/img/favicon.svg?v=8" type="image/svg+xml">
+  <link rel="icon" href="/static/img/favicon.svg?v=2" type="image/svg+xml">
+  <link rel="icon" href="/static/img/favicon-32.png?v=2" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="/static/img/apple-touch-icon.png?v=2">
   <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="/static/css/app.css?v=5">
+  <link rel="stylesheet" href="/static/css/app.css?v=30">
   
 </head>
 <body data-page="test">
   <header class="topbar">
     <a class="brand" href="/" aria-label="Лови Ритм">
-      <span class="brand__dot" aria-hidden="true"></span>Лови Ритм
+      <svg class="brand__icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+        <rect width="64" height="64" rx="14" fill="#7c3aed"/>
+        <path d="M27.4 23.2c.25-1.5 1.2-2.2 2.7-2.2h7.8c1.5 0 2.45.7 2.7 2.2L48.2 46.4c.4 2-.75 3.2-2.7 3.2H18.5c-1.95 0-3.1-1.2-2.7-3.2z" fill="#ffffff"/>
+        <path d="M31.6 44.6 36.4 30" stroke="#7c3aed" stroke-width="4.6" stroke-linecap="round"/>
+        <path d="M37 27.5 41.6 14.5" stroke="#ffffff" stroke-width="4.6" stroke-linecap="round"/>
+        <circle cx="42.6" cy="11.8" r="4.2" fill="#ffffff"/>
+      </svg>Лови Ритм
     </a>
     <nav class="topnav" aria-label="Разделы">
       <a class="nav-link is-active" href="/" aria-current="page">Тест</a>
@@ -28,23 +36,27 @@
 
   <!-- ======================= СТАРТ ======================= -->
   <section id="screenStart" class="screen">
-    <h1 class="hero">Лови Ритм</h1>
-    <p class="lead">
-      Тапайте в такт клику. Когда звук выключится —
-      <b>продолжайте в том же темпе.</b>
-    </p>
+    <h1 class="hero">Проверьте своё чувство ритма</h1>
 
     <p class="step">Выберите режим</p>
     <div class="modes" role="group" aria-label="Способ ввода">
-      <button type="button" id="modeTap" class="mode is-on" aria-pressed="true">
-        <span class="mode__emoji" aria-hidden="true">👆</span>
-        <span class="mode__name">Тапами</span>
-        <span class="mode__desc">По экрану или клавишей «Пробел»</span>
+      <button type="button" id="modeTap" class="mode" aria-pressed="false">
+        <img class="mode__img" src="/static/img/mode-tap.jpg" alt="" width="900" height="675"
+             loading="eager" decoding="async">
+        <span class="mode__scrim" aria-hidden="true"></span>
+        <span class="mode__body">
+          <span class="mode__name">Тапами</span>
+          <span class="mode__desc">По экрану или клавишей «Пробел»</span>
+        </span>
       </button>
       <button type="button" id="modeVoice" class="mode" aria-pressed="false">
-        <span class="mode__emoji" aria-hidden="true">🎤</span>
-        <span class="mode__name">Голосом</span>
-        <span class="mode__desc">Резко говорите «та» в микрофон</span>
+        <img class="mode__img" src="/static/img/mode-voice.jpg" alt="" width="900" height="675"
+             loading="eager" decoding="async">
+        <span class="mode__scrim" aria-hidden="true"></span>
+        <span class="mode__body">
+          <span class="mode__name">Голосом</span>
+          <span class="mode__desc">Резко говорите «та» в микрофон</span>
+        </span>
       </button>
     </div>
 
@@ -108,6 +120,6 @@
 
   <script src="/static/js/online.js?v=1" defer></script>
   <script src="/static/js/site.js?v=9" defer></script>
-  <script src="/static/js/voice-gate.js?v=4" defer></script><script src="/static/js/mic.js?v=4" defer></script><script src="/static/js/test.js?v=30" defer></script>
+  <script src="/static/js/voice-gate.js?v=4" defer></script><script src="/static/js/mic.js?v=4" defer></script><script src="/static/js/test.js?v=32" defer></script>
 </body>
 </html>

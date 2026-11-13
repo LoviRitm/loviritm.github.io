@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <pattern id="dots" width="40" height="40" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.6" fill="#8b5cf6" opacity="0.16"/>
+    </pattern>
+    <clipPath id="frame"><rect width="1600" height="1000"/></clipPath>
+  </defs>
+
+  <rect width="1600" height="1000" fill="#0b0f18"/>
+  <rect width="1600" height="1000" fill="url(#dots)"/>
+
+  <g clip-path="url(#frame)">
+    <circle cx="1350" cy="130" r="330" fill="none" stroke="#8b5cf6" stroke-width="2" opacity="0.28"/>
+    <circle cx="1350" cy="130" r="235" fill="none" stroke="#22d3ee" stroke-width="2" opacity="0.20"/>
+    <circle cx="1350" cy="130" r="150" fill="#7c3aed" opacity="0.14"/>
+
+    <circle cx="180" cy="880" r="260" fill="#22d3ee" opacity="0.07"/>
+    <circle cx="180" cy="880" r="180" fill="none" stroke="#22d3ee" stroke-width="2" opacity="0.16"/>
+    <circle cx="180" cy="880" r="110" fill="none" stroke="#8b5cf6" stroke-width="2" opacity="0.22"/>
+
+    <path d="M0 760 Q 260 590 520 760 T 1040 760 T 1560 760" fill="none" stroke="#8b5cf6" stroke-width="2" opacity="0.20"/>
+    <path d="M0 830 Q 260 660 520 830 T 1040 830 T 1560 830" fill="none" stroke="#22d3ee" stroke-width="2" opacity="0.14"/>
+
+    <rect x="1180" y="700" width="150" height="150" fill="none" stroke="#8b5cf6" stroke-width="2" opacity="0.22" transform="rotate(15 1255 775)"/>
+    <rect x="1250" y="770" width="90" height="90" fill="#22d3ee" opacity="0.06" transform="rotate(15 1295 815)"/>
+
+    <path d="M120 120 L 260 120 L 190 245 Z" fill="none" stroke="#22d3ee" stroke-width="2" opacity="0.22"/>
+    <path d="M640 60 L 760 60 L 700 170 Z" fill="#8b5cf6" opacity="0.08"/>
+
+    <rect x="700" y="880" width="220" height="4" fill="#8b5cf6" opacity="0.18"/>
+    <rect x="700" y="900" width="140" height="4" fill="#22d3ee" opacity="0.14"/>
+  </g>
+</svg>

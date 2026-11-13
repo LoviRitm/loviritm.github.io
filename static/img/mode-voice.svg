@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-label="Режим голосом: микрофон и звуковые волны">
+  <defs>
+    <linearGradient id="voiceBg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1a2130"/>
+      <stop offset="1" stop-color="#0d1219"/>
+    </linearGradient>
+    <radialGradient id="voiceGlow" cx="50%" cy="26%" r="46%">
+      <stop offset="0" stop-color="#8b5cf6" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#8b5cf6" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="800" height="600" fill="url(#voiceBg)"/>
+  <rect width="800" height="600" fill="url(#voiceGlow)"/>
+
+  <!-- звуковые волны -->
+  <g fill="none" stroke-linecap="round">
+    <path d="M310 92a62 62 0 0 0 0 124" stroke="#8b5cf6" stroke-width="7" opacity="0.9"/>
+    <path d="M490 92a62 62 0 0 1 0 124" stroke="#8b5cf6" stroke-width="7" opacity="0.9"/>
+    <path d="M278 62a104 104 0 0 0 0 184" stroke="#8b5cf6" stroke-width="5" opacity="0.45"/>
+    <path d="M522 62a104 104 0 0 1 0 184" stroke="#8b5cf6" stroke-width="5" opacity="0.45"/>
+    <path d="M246 32a146 146 0 0 0 0 244" stroke="#22d3ee" stroke-width="4" opacity="0.25"/>
+    <path d="M554 32a146 146 0 0 1 0 244" stroke="#22d3ee" stroke-width="4" opacity="0.25"/>
+  </g>
+
+  <!-- микрофон -->
+  <rect x="358" y="18" width="84" height="168" rx="42" fill="#ffffff"/>
+  <g stroke="#a9b4c8" stroke-width="3" opacity="0.5">
+    <path d="M364 52h72M364 72h72M364 92h72M364 112h72M364 132h72M364 152h72"/>
+  </g>
+  <path d="M326 128v18a74 74 0 0 0 148 0v-18" fill="none" stroke="#ffffff" stroke-width="13" stroke-linecap="round"/>
+  <path d="M400 222v48" stroke="#ffffff" stroke-width="13" stroke-linecap="round"/>
+  <path d="M355 280h90" stroke="#ffffff" stroke-width="13" stroke-linecap="round"/>
+</svg>

@@ -68,7 +68,7 @@ const state = {
   tapResiduals: [],
   tapOffset: 0,        // постоянное запаздывание/опережение в кликовой фазе
   score: null,
-  input: 'tap',        // tap | voice
+  input: null,         // tap | voice — до выбора режима пусто
   paused: false,       // вкладка/приложение свёрнуто — тест заморожен
 };
 
@@ -349,6 +349,13 @@ function handleTap(ev) {
 
 async function start() {
   if (state.mode === 'running' || starting) return;
+
+  // Без выбранного режима не запускаем: на старте ни одна
+  // карточка не подсвечена.
+  if (!state.input) {
+    setMicStatus('Сначала выберите режим: «Тапами» или «Голосом».', true);
+    return;
+  }
 
   starting = true;
   const token = ++startToken;
@@ -796,26 +803,22 @@ function setMicStatus(text, isError) {
 }
 
 function syncModeUI() {
+  const tap = state.input === 'tap';
   const voice = state.input === 'voice';
 
-  $('modeTap').classList.toggle('is-on', !voice);
-  $('modeTap').setAttribute('aria-pressed', String(!voice));
+  $('modeTap').classList.toggle('is-on', tap);
+  $('modeTap').setAttribute('aria-pressed', String(tap));
   $('modeVoice').classList.toggle('is-on', voice);
   $('modeVoice').setAttribute('aria-pressed', String(voice));
 
-  if (voice && state.mode !== 'running' && !starting) {
-    setMicStatus('Микрофон включится после «Начать тест». Говорите «та» резко и отчётливо.');
-  } else if (!voice) {
-    setMicStatus('');
-  }
+  // Подсказку о микрофоне не показываем: при выборе режима
+  // строка статуса остаётся пустой.
+  if (state.mode !== 'running' && !starting) setMicStatus('');
 }
 
 function setInput(mode) {
   if (state.mode === 'running' || starting) return;
   state.input = mode === 'voice' ? 'voice' : 'tap';
-  try {
-    localStorage.setItem('loviritm.input', state.input);
-  } catch {}
   syncModeUI();
 }
 
@@ -892,7 +895,7 @@ window.addEventListener('resize', () => {
 /* ------------------------------------------------------------ */
 
 try {
-  if (localStorage.getItem('loviritm.input') === 'voice') state.input = 'voice';
+  localStorage.removeItem('loviritm.input');
 } catch {}
 
 syncModeUI();
