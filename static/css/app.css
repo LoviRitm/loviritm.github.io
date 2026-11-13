@@ -930,6 +930,7 @@ button, input { font: inherit; }
   font: inherit;
   font-weight: 600;
   color: var(--text);
+  text-align: left;
   cursor: pointer;
   text-decoration: underline;
   text-decoration-color: rgba(139, 92, 246, 0.55);
