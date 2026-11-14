@@ -190,6 +190,12 @@ button, input { font: inherit; }
   body[data-page="test"] main { padding-bottom: 96px; }
 }
 
+/* На телефонах контент занимает экран целиком, поэтому добавляем
+   воздух под кнопкой — панель автора начинается ниже. */
+@media (max-width: 899px) {
+  #screenStart { padding-bottom: 80px; }
+}
+
 /* Надзаголовок: мелкая подпись над H1, без плашки. */
 .pill {
   align-self: flex-start;
@@ -1121,12 +1127,21 @@ button, input { font: inherit; }
 
 .author-card__sep { color: var(--muted); }
 
+.author-card__lead {
+  margin: 16px auto 0;
+  max-width: 44ch;
+  color: var(--dim);
+  font-size: 14px;
+  line-height: 1.55;
+  text-wrap: pretty;
+}
+
 .author-card__cta {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: 46px;
-  margin-top: 18px;
+  margin-top: 14px;
   padding: 0 22px;
   border: 1px solid var(--accent);
   border-radius: var(--radius);
