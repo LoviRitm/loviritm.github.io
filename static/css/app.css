@@ -1006,47 +1006,6 @@ button, input { font: inherit; }
   overflow-wrap: break-word;
 }
 
-.modal__card--feedback {
-  max-width: 760px;
-  max-height: 92dvh;
-  overflow: hidden;
-  gap: 10px;
-}
-
-.modal__card--feedback .modal__name {
-  padding: 0 40px;
-}
-
-.feedback-frame {
-  width: 100%;
-  height: min(70dvh, 640px);
-  min-height: 0;
-  overflow: hidden;
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-}
-
-.feedback-frame iframe {
-  display: block;
-  width: 100%;
-  height: 100%;
-  border: 0;
-}
-
-.feedback-fallback {
-  margin: 0;
-  text-align: center;
-  color: var(--muted);
-  font-size: var(--fs-small);
-}
-
-.feedback-fallback a {
-  color: #c4b5fd;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
 .score--modal .score__num {
   font-size: clamp(44px, 10vw, 60px);
   font-weight: 800;
@@ -1056,30 +1015,38 @@ button, input { font: inherit; }
 /* ---------------------------- Футер -------------------------- */
 
 .foot {
-  padding: 0 max(20px, env(safe-area-inset-right, 0px)) 26px max(20px, env(safe-area-inset-left, 0px));
+  padding: 0;
 }
 
 .author-card {
   width: 100%;
-  max-width: 760px;
-  margin: 18px auto 0;
-  padding: 26px 24px 22px;
+  max-width: none;
+  margin: 0;
+  padding: 34px 20px 30px;
   background: #eef2ff;
   color: #0b0f18;
-  border: 1px solid #c7d2fe;
-  border-radius: 12px;
+  border: 0;
+  border-top: 1px solid #c7d2fe;
+  border-radius: 0;
   text-align: center;
-  transition: opacity 0.35s ease, transform 0.35s ease;
+  transition: opacity 0.7s ease, transform 0.7s ease;
+  will-change: opacity, transform;
 }
 
 .author-card.is-reveal-ready {
   opacity: 0;
   transform: translateY(18px);
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.7s ease, transform 0.7s ease, visibility 0s linear 0.7s;
 }
 
 .author-card.is-reveal-ready.is-visible {
   opacity: 1;
   transform: none;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 0.7s ease, transform 0.7s ease, visibility 0s linear 0s;
 }
 
 .author-card__kicker {
@@ -1135,6 +1102,8 @@ button, input { font: inherit; }
   font: inherit;
   font-size: 14.5px;
   font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none;
   cursor: pointer;
   transition: background 0.2s ease, border-color 0.2s ease;
 }
@@ -1175,12 +1144,10 @@ button, input { font: inherit; }
     padding-right: max(14px, env(safe-area-inset-right, 0px));
   }
   .foot {
-    padding-left: max(14px, env(safe-area-inset-left, 0px));
-    padding-right: max(14px, env(safe-area-inset-right, 0px));
-    padding-bottom: 22px;
+    padding: 0;
   }
   .author-card {
-    padding: 22px 16px 18px;
+    padding: 28px 16px 24px;
   }
   .author-card__links {
     gap: 6px;
@@ -1188,13 +1155,6 @@ button, input { font: inherit; }
   }
   .author-card__cta {
     width: 100%;
-  }
-  .modal__card--feedback {
-    max-height: 94dvh;
-    padding: 18px 14px 14px;
-  }
-  .feedback-frame {
-    height: 74dvh;
   }
   .stat b { font-size: 20px; }
 }

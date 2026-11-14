@@ -7,7 +7,7 @@
    обновлением.
    ============================================================ */
 
-const CACHE = 'loviritm-v62';
+const CACHE = 'loviritm-v64';
 const ASSETS = [
   '/',
   '/records.html',
