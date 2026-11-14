@@ -12,7 +12,8 @@
   <link rel="icon" href="/static/img/favicon-32.png?v=2" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="/static/img/apple-touch-icon.png?v=2">
   <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="/static/css/app.css?v=31">
+  <meta name="feedback-form-url" content="https://forms.yandex.ru/u/6af823d995add5f825b79e10/?iframe=1&amp;theme=light">
+  <link rel="stylesheet" href="/static/css/app.css?v=32">
   
 </head>
 <body data-page="test">
@@ -114,12 +115,39 @@
 </main>
 
   <footer class="foot">
-    <span>Лови Ритм · 2026</span>
-    <span>Все права защищены</span>
+    <section class="author-card" aria-labelledby="authorTitle" data-reveal>
+      <p class="author-card__kicker" id="authorTitle">Автор проекта</p>
+      <p class="author-card__name">Денис Склизков</p>
+      <p class="author-card__links">
+        <a href="https://github.com/denklin18-star" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <span class="author-card__sep" aria-hidden="true">·</span>
+        <a href="https://vk.ru/folkdens" target="_blank" rel="noopener noreferrer">ВКонтакте</a>
+      </p>
+      <button class="author-card__cta" type="button" data-feedback-open aria-haspopup="dialog">
+        Идеи и баги
+      </button>
+      <p class="author-card__copyright">© 2026 «Лови Ритм». Все права защищены.</p>
+    </section>
   </footer>
+
+  <div class="modal" id="feedbackModal" hidden>
+    <div class="modal__backdrop" data-feedback-close></div>
+    <div class="modal__card modal__card--feedback" role="dialog" aria-modal="true" aria-labelledby="feedbackTitle">
+      <button class="modal__close" type="button" data-feedback-close aria-label="Закрыть">×</button>
+      <h2 class="modal__name" id="feedbackTitle">Идеи и баги</h2>
+      <div class="feedback-frame">
+        <iframe id="feedbackFrame" title="Форма обратной связи"></iframe>
+      </div>
+      <p class="feedback-fallback">
+        Форма не открылась?
+        <a id="feedbackFallback" href="#" target="_blank" rel="noopener noreferrer">Открыть в новой вкладке</a>
+      </p>
+    </div>
+  </div>
 
   <script src="/static/js/online.js?v=1" defer></script>
   <script src="/static/js/site.js?v=9" defer></script>
+  <script src="/static/js/feedback.js?v=1" defer></script>
   <script src="/static/js/voice-gate.js?v=4" defer></script><script src="/static/js/mic.js?v=4" defer></script><script src="/static/js/test.js?v=32" defer></script>
 </body>
 </html>
