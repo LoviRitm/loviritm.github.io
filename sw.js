@@ -1,4 +1,4 @@
-'use strict';
+﻿'use strict';
 
 /* ============================================================
    Service Worker: офлайн-кэш сайта.
@@ -7,7 +7,7 @@
    обновлением.
    ============================================================ */
 
-const CACHE = 'loviritm-v64';
+const CACHE = 'loviritm-v73';
 const ASSETS = [
   '/',
   '/records.html',
@@ -32,6 +32,7 @@ const ASSETS = [
   '/static/fonts/montserrat-latin.woff2',
   '/static/img/mode-tap.jpg',
   '/static/img/mode-voice.jpg',
+  '/static/img/panel-geometry.svg',
 ];
 
 self.addEventListener('install', (event) => {

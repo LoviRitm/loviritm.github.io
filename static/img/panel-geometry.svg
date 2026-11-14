@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <pattern id="panelDots" width="34" height="34" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.4" fill="#8b5cf6" opacity="0.16"/>
+    </pattern>
+    <clipPath id="panelFrame"><rect width="1200" height="360"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#panelFrame)">
+    <rect width="1200" height="360" fill="url(#panelDots)" opacity="0.5"/>
+
+    <circle cx="1090" cy="40" r="210" fill="none" stroke="#8b5cf6" stroke-width="1.6" opacity="0.22"/>
+    <circle cx="1090" cy="40" r="145" fill="none" stroke="#22d3ee" stroke-width="1.6" opacity="0.14"/>
+
+    <circle cx="90" cy="330" r="180" fill="none" stroke="#22d3ee" stroke-width="1.6" opacity="0.14"/>
+    <circle cx="90" cy="330" r="110" fill="none" stroke="#8b5cf6" stroke-width="1.6" opacity="0.18"/>
+
+    <path d="M320 360 420 190 520 360Z" fill="none" stroke="#8b5cf6" stroke-width="1.6" opacity="0.16"/>
+    <path d="M760 0 830 120 690 120Z" fill="none" stroke="#22d3ee" stroke-width="1.6" opacity="0.14"/>
+    <rect x="925" y="250" width="84" height="84" fill="none" stroke="#8b5cf6" stroke-width="1.6" opacity="0.16" transform="rotate(12 967 292)"/>
+  </g>
+</svg>

@@ -2,10 +2,11 @@
 
 /* ============================================================
    Блок автора:
-   - скрыт при загрузке страницы;
-   - медленно появляется при прокрутке вниз;
-   - медленно исчезает при прокрутке вверх.
-   Без JavaScript блок остаётся видимым.
+   - лежит ниже первого экрана, при загрузке не виден;
+   - при прокрутке вниз проявляется;
+   - при прокрутке вверх снова скрывается.
+   Без JavaScript и при отключённой анимации блок остаётся
+   видимым обычным контентом.
    ============================================================ */
 
 (() => {
@@ -13,30 +14,22 @@
   if (!card) return;
 
   const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-  if (reduceMotion) return;
+  if (reduceMotion || !('IntersectionObserver' in window)) return;
 
   card.classList.add('is-reveal-ready');
 
-  let lastY = window.scrollY;
+  /* Нижняя граница области чуть поднята: у самой линии сгиба карточка
+     не должна считаться видимой, иначе она остаётся проявленной
+     после возврата наверх. */
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting && entry.intersectionRatio >= 0.2) {
+        card.classList.add('is-visible');
+      } else if (!entry.isIntersecting) {
+        card.classList.remove('is-visible');
+      }
+    });
+  }, { rootMargin: '0px 0px -80px 0px', threshold: [0, 0.2, 0.5, 1] });
 
-  function isInView() {
-    const rect = card.getBoundingClientRect();
-    return rect.top < window.innerHeight - 40 && rect.bottom > 0;
-  }
-
-  function onScroll() {
-    const y = window.scrollY;
-    const delta = y - lastY;
-    lastY = y;
-
-    if (Math.abs(delta) < 1) return;
-
-    if (delta > 0) {
-      if (isInView()) card.classList.add('is-visible');
-    } else {
-      card.classList.remove('is-visible');
-    }
-  }
-
-  window.addEventListener('scroll', onScroll, { passive: true });
+  observer.observe(card);
 })();

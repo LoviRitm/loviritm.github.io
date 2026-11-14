@@ -1,4 +1,4 @@
-/* ============================================================
+﻿/* ============================================================
    Лови Ритм — единый стиль (тест + рекорды)
    Тёмная тема, геометрическая графика, крупная типографика.
    ============================================================ */
@@ -74,7 +74,16 @@ body {
   line-height: 1.6;
 }
 
-/* Подвал прижат к низу, даже если контента мало. */
+/* Оболочка сайта: шапка и контент занимают ровно один экран.
+   Панель автора лежит ниже, поэтому её видно только при прокрутке. */
+.page {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100dvh;
+}
+
+/* Контент растягивается на свободное место, подвал идёт следом за ним. */
 main {
   flex: 1 0 auto;
   display: flex;
@@ -167,7 +176,7 @@ button, input { font: inherit; }
   width: 100%;
   max-width: 760px;
   margin: 0 auto;
-  padding: 24px max(20px, env(safe-area-inset-right, 0px)) 48px max(20px, env(safe-area-inset-left, 0px));
+  padding: 24px max(20px, env(safe-area-inset-right, 0px)) 24px max(20px, env(safe-area-inset-left, 0px));
 }
 
 .screen { display: flex; flex-direction: column; gap: 16px; }
@@ -175,6 +184,11 @@ button, input { font: inherit; }
 /* Главная: блок стоит по центру свободного места, поэтому отступы
    сверху и снизу одинаковые. При нехватке высоты упирается вверх. */
 #screenStart { margin-block: auto; }
+
+/* На широких экранах чуть поднимаем блок — ближе к шапке. */
+@media (min-width: 900px) {
+  body[data-page="test"] main { padding-bottom: 96px; }
+}
 
 /* Надзаголовок: мелкая подпись над H1, без плашки. */
 .pill {
@@ -1015,55 +1029,73 @@ button, input { font: inherit; }
 /* ---------------------------- Футер -------------------------- */
 
 .foot {
+  flex: none;
   padding: 0;
 }
 
 .author-card {
+  position: relative;
   width: 100%;
   max-width: none;
   margin: 0;
-  padding: 34px 20px 30px;
-  background: #eef2ff;
-  color: #0b0f18;
+  padding: 36px 20px 32px;
+  background: #101826;
+  color: var(--text);
   border: 0;
-  border-top: 1px solid #c7d2fe;
+  border-top: 1px solid var(--line);
   border-radius: 0;
   text-align: center;
+  overflow: hidden;
   transition: opacity 0.7s ease, transform 0.7s ease;
   will-change: opacity, transform;
 }
 
+/* Тот же геометрический орнамент, что и на фоне, только тише. */
+.author-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: url("/static/img/panel-geometry.svg") center / cover no-repeat;
+  opacity: 0.75;
+}
+
+.author-card > * {
+  position: relative;
+  z-index: 1;
+}
+
 .author-card.is-reveal-ready {
   opacity: 0;
-  transform: translateY(18px);
   visibility: hidden;
   pointer-events: none;
-  transition: opacity 0.7s ease, transform 0.7s ease, visibility 0s linear 0.7s;
+  transition: opacity 0.7s ease, visibility 0s linear 0.7s;
 }
 
 .author-card.is-reveal-ready.is-visible {
   opacity: 1;
-  transform: none;
   visibility: visible;
   pointer-events: auto;
-  transition: opacity 0.7s ease, transform 0.7s ease, visibility 0s linear 0s;
+  transition: opacity 0.7s ease, visibility 0s linear 0s;
 }
 
 .author-card__kicker {
-  margin: 0 0 6px;
-  color: #4c1d95;
+  margin: 0 0 8px;
+  color: var(--accent-2);
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
 }
 
 .author-card__name {
   margin: 0;
-  font-size: clamp(23px, 4vw, 28px);
+  font-size: clamp(23px, 4vw, 27px);
   font-weight: 750;
   line-height: 1.2;
   letter-spacing: -0.02em;
+  color: var(--text);
 }
 
 .author-card__links {
@@ -1071,63 +1103,70 @@ button, input { font: inherit; }
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  margin: 12px 0 0;
+  gap: 10px;
+  margin: 14px 0 0;
   font-size: 14.5px;
   font-weight: 600;
 }
 
 .author-card__links a {
-  color: #4c1d95;
+  color: #c4b5fd;
   text-decoration: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 3px;
+  transition: color 0.15s ease;
 }
 
-.author-card__links a:hover { color: #7c3aed; }
+.author-card__links a:hover { color: #ffffff; }
 
-.author-card__sep { color: #8b5cf6; }
+.author-card__sep { color: var(--muted); }
 
 .author-card__cta {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
-  margin-top: 16px;
-  padding: 0 20px;
-  border: 1px solid #0b0f18;
-  border-radius: 8px;
-  background: #0b0f18;
-  color: #f1f5fb;
+  min-height: 46px;
+  margin-top: 18px;
+  padding: 0 22px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: #0b0f18;
   font: inherit;
-  font-size: 14.5px;
+  font-size: 15px;
   font-weight: 700;
   line-height: 1.2;
   text-decoration: none;
   cursor: pointer;
-  transition: background 0.2s ease, border-color 0.2s ease;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .author-card__cta:hover {
-  background: #2a1b4d;
-  border-color: #2a1b4d;
+  background: #a78bfa;
+  border-color: #a78bfa;
+}
+
+.author-card__cta:active {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
 }
 
 .author-card__cta:focus-visible,
 .author-card__links a:focus-visible {
-  outline: 2px solid #7c3aed;
+  outline: 2px solid var(--accent-2);
   outline-offset: 3px;
 }
 
 .author-card__copyright {
-  margin: 18px 0 0;
-  padding-top: 14px;
-  border-top: 1px solid rgba(11, 15, 24, 0.14);
-  color: #475569;
+  margin: 20px auto 0;
+  padding-top: 16px;
+  max-width: 760px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
   font-size: 12.5px;
   line-height: 1.5;
 }
-
 /* -------------------------- Адаптив -------------------------- */
 
 @media (max-width: 420px) {
@@ -1139,7 +1178,7 @@ button, input { font: inherit; }
   }
   .wrap {
     padding-top: 16px;
-    padding-bottom: 36px;
+    padding-bottom: 16px;
     padding-left: max(14px, env(safe-area-inset-left, 0px));
     padding-right: max(14px, env(safe-area-inset-right, 0px));
   }

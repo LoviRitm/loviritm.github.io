@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ru">
 <head>
   <meta charset="utf-8">
@@ -12,27 +12,28 @@
   <link rel="icon" href="/static/img/favicon-32.png?v=2" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="/static/img/apple-touch-icon.png?v=2">
   <link rel="manifest" href="/manifest.json">
-  <link rel="stylesheet" href="/static/css/app.css?v=34">
+  <link rel="stylesheet" href="/static/css/app.css?v=39">
   
 </head>
 <body data-page="test">
-  <header class="topbar">
-    <a class="brand" href="/" aria-label="Лови Ритм">
-      <svg class="brand__icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
-        <rect width="64" height="64" rx="14" fill="#7c3aed"/>
-        <path d="M27.4 23.2c.25-1.5 1.2-2.2 2.7-2.2h7.8c1.5 0 2.45.7 2.7 2.2L48.2 46.4c.4 2-.75 3.2-2.7 3.2H18.5c-1.95 0-3.1-1.2-2.7-3.2z" fill="#ffffff"/>
-        <path d="M31.6 44.6 36.4 30" stroke="#7c3aed" stroke-width="4.6" stroke-linecap="round"/>
-        <path d="M37 27.5 41.6 14.5" stroke="#ffffff" stroke-width="4.6" stroke-linecap="round"/>
-        <circle cx="42.6" cy="11.8" r="4.2" fill="#ffffff"/>
-      </svg>Лови Ритм
-    </a>
-    <nav class="topnav" aria-label="Разделы">
-      <a class="nav-link is-active" href="/" aria-current="page">Тест</a>
+  <div class="page">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="Лови Ритм">
+        <svg class="brand__icon" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+          <rect width="64" height="64" rx="14" fill="#7c3aed"/>
+          <path d="M27.4 23.2c.25-1.5 1.2-2.2 2.7-2.2h7.8c1.5 0 2.45.7 2.7 2.2L48.2 46.4c.4 2-.75 3.2-2.7 3.2H18.5c-1.95 0-3.1-1.2-2.7-3.2z" fill="#ffffff"/>
+          <path d="M31.6 44.6 36.4 30" stroke="#7c3aed" stroke-width="4.6" stroke-linecap="round"/>
+          <path d="M37 27.5 41.6 14.5" stroke="#ffffff" stroke-width="4.6" stroke-linecap="round"/>
+          <circle cx="42.6" cy="11.8" r="4.2" fill="#ffffff"/>
+        </svg>Лови Ритм
+      </a>
+      <nav class="topnav" aria-label="Разделы">
+        <a class="nav-link is-active" href="/" aria-current="page">Тест</a>
         <a class="nav-link" href="/records.html">Рекорды</a>
-    </nav>
-  </header>
+      </nav>
+    </header>
 
-  <main id="main"><div class="wrap">
+    <main id="main"><div class="wrap">
 
   <!-- ======================= СТАРТ ======================= -->
   <section id="screenStart" class="screen">
@@ -112,6 +113,7 @@
   <button type="button" id="btnStop" class="stage__stop">Завершить</button>
 </section>
 </main>
+  </div>
 
   <footer class="foot">
     <section class="author-card" aria-labelledby="authorTitle" data-reveal>
@@ -134,7 +136,7 @@
 
   <script src="/static/js/online.js?v=1" defer></script>
   <script src="/static/js/site.js?v=9" defer></script>
-  <script src="/static/js/feedback.js?v=3" defer></script>
+  <script src="/static/js/feedback.js?v=5" defer></script>
   <script src="/static/js/voice-gate.js?v=4" defer></script><script src="/static/js/mic.js?v=4" defer></script><script src="/static/js/test.js?v=32" defer></script>
 </body>
 </html>
