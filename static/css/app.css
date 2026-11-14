@@ -194,6 +194,7 @@ button, input { font: inherit; }
    воздух под кнопкой — панель автора начинается ниже. */
 @media (max-width: 899px) {
   #screenStart { padding-bottom: 80px; }
+  body[data-page="records"] main { padding-bottom: 80px; }
 }
 
 /* Надзаголовок: мелкая подпись над H1, без плашки. */
