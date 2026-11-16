@@ -7,7 +7,7 @@
    обновлением.
    ============================================================ */
 
-const CACHE = 'loviritm-v80';
+const CACHE = 'loviritm-v81';
 const ASSETS = [
   '/',
   '/records.html',
@@ -20,6 +20,7 @@ const ASSETS = [
   '/static/js/voice-gate.js',
   '/static/js/mic.js',
   '/static/js/test.js',
+  '/favicon.ico',
   '/static/img/favicon.svg',
   '/static/img/favicon-32.png',
   '/static/img/apple-touch-icon.png',
