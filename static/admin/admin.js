@@ -517,7 +517,7 @@
     const limit = Math.ceil(maxAbs / 25) * 25;
     const zeroY = pad.top + innerH / 2;
     const stepX = innerW / values.length;
-    const barW = Math.max(4, stepX * 0.55);
+    const barW = Math.max(3, Math.min(8, stepX * 0.28));
 
     const y = (value) => zeroY - (value / limit) * (innerH / 2);
     const x = (index) => pad.left + stepX * index + stepX / 2;
