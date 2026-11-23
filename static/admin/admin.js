@@ -304,33 +304,81 @@
     `).join('');
   }
 
+  function aggregateDaily(daily) {
+    if (daily.length <= 90) {
+      return { items: daily, note: 'По дням' };
+    }
+
+    const byWeek = daily.length <= 180;
+    const groups = new Map();
+
+    for (const item of daily) {
+      const date = new Date(`${item.day}T00:00:00`);
+      let key;
+      let label;
+
+      if (byWeek) {
+        const monday = new Date(date);
+        const offset = (monday.getDay() + 6) % 7;
+        monday.setDate(monday.getDate() - offset);
+        key = monday.toISOString().slice(0, 10);
+        label = `нед. ${monday.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit' })}`;
+      } else {
+        key = item.day.slice(0, 7);
+        label = new Date(date.getFullYear(), date.getMonth(), 1)
+          .toLocaleDateString('ru-RU', { month: 'short', year: 'numeric' });
+      }
+
+      if (!groups.has(key)) {
+        groups.set(key, { key, label, visits: 0, visitors: 0, tests: 0, scores: 0 });
+      }
+
+      const group = groups.get(key);
+      group.visits += Number(item.visits) || 0;
+      group.visitors += Number(item.visitors) || 0;
+      group.tests += Number(item.tests) || 0;
+      group.scores += Number(item.scores) || 0;
+    }
+
+    return {
+      items: Array.from(groups.values()),
+      note: byWeek ? 'По неделям' : 'По месяцам',
+    };
+  }
+
   function renderDailyChart() {
     const daily = Array.isArray(state.dashboard?.daily) ? state.dashboard.daily : [];
     const node = $('dailyChart');
+    const note = $('dailyChartNote');
     if (!daily.length) {
       node.innerHTML = '<p class="empty">Пока нет данных за этот период.</p>';
+      if (note) note.textContent = 'По дням';
       return;
     }
 
-    const max = Math.max(...daily.map((item) => Number(item.visits) || 0), 1);
-    const bars = daily.map((item) => {
+    const { items, note: noteText } = aggregateDaily(daily);
+    if (note) note.textContent = noteText;
+
+    const max = Math.max(...items.map((item) => Number(item.visits) || 0), 1);
+    const bars = items.map((item) => {
       const visits = Number(item.visits) || 0;
       const visitors = Number(item.visitors) || 0;
       const tests = Number(item.tests) || 0;
       const height = Math.max(3, Math.round((visits / max) * 100));
-      return `<div class="chart__bar" style="--height:${height}%" data-tip="${esc(item.day)}: ${visits} просм. / ${visitors} посет. / ${tests} тестов"></div>`;
+      const label = item.label || fmtDay(item.day);
+      return `<div class="chart__bar" style="--height:${height}%" data-tip="${esc(label)}: ${visits} просм. / ${visitors} посет. / ${tests} тестов"></div>`;
     }).join('');
 
-    const first = daily[0]?.day || '';
-    const middle = daily[Math.floor(daily.length / 2)]?.day || '';
-    const last = daily[daily.length - 1]?.day || '';
+    const first = items[0]?.label || fmtDay(items[0]?.day || '');
+    const middle = items[Math.floor(items.length / 2)]?.label || fmtDay(items[Math.floor(items.length / 2)]?.day || '');
+    const last = items[items.length - 1]?.label || fmtDay(items[items.length - 1]?.day || '');
 
     node.innerHTML = `
       <div class="chart__bars">${bars}</div>
       <div class="chart__labels">
-        <span>${esc(fmtDay(first))}</span>
-        <span>${esc(fmtDay(middle))}</span>
-        <span>${esc(fmtDay(last))}</span>
+        <span>${esc(first)}</span>
+        <span>${esc(middle)}</span>
+        <span>${esc(last)}</span>
       </div>
     `;
   }

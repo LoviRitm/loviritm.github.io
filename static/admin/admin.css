@@ -310,12 +310,13 @@ select:focus {
 /* --- chart -------------------------------------------------- */
 .chart {
   min-height: 210px;
+  overflow-x: auto;
 }
 
 .chart__bars {
   display: flex;
   align-items: end;
-  gap: 3px;
+  gap: 2px;
   height: 170px;
   padding-top: 12px;
 }
@@ -323,7 +324,7 @@ select:focus {
 .chart__bar {
   position: relative;
   flex: 1 1 0;
-  min-width: 2px;
+  min-width: 0;
   height: max(3px, var(--height, 3%));
   border-radius: 5px 5px 2px 2px;
   background: linear-gradient(180deg, var(--accent-2), var(--accent));
