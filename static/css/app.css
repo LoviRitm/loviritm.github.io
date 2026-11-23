@@ -333,6 +333,7 @@ body[data-page="records"] main { padding-bottom: 96px; }
 .modes {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  align-items: stretch;
   gap: 14px;
 }
 
@@ -341,6 +342,9 @@ body[data-page="records"] main { padding-bottom: 96px; }
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   overflow: hidden;
   padding: 0;
   min-height: 210px;
@@ -380,6 +384,7 @@ body[data-page="records"] main { padding-bottom: 96px; }
   position: relative;
   display: flex;
   flex-direction: column;
+  min-width: 0;
   gap: 3px;
   padding: 14px 16px;
   background: rgba(9, 13, 21, 0.9);
@@ -397,6 +402,7 @@ body[data-page="records"] main { padding-bottom: 96px; }
   font-size: var(--fs-small);
   line-height: 1.4;
   color: var(--dim);
+  overflow-wrap: anywhere;
   text-wrap: pretty;
 }
 
