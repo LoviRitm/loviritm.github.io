@@ -7,7 +7,7 @@
    обновлением.
    ============================================================ */
 
-const CACHE = 'loviritm-v81';
+const CACHE = 'loviritm-v82';
 const ASSETS = [
   '/',
   '/records.html',
@@ -15,6 +15,7 @@ const ASSETS = [
   '/scores.json',
   '/static/css/app.css',
   '/static/js/online.js',
+  '/static/js/analytics.js',
   '/static/js/site.js',
   '/static/js/feedback.js',
   '/static/js/voice-gate.js',
@@ -60,6 +61,10 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   const req = event.request;
+
+  // Админка всегда работает через сеть и не должна попадать в офлайн-кэш.
+  const pathname = new URL(req.url).pathname;
+  if (pathname.startsWith('/admin/') || pathname.startsWith('/static/admin/')) return;
 
   // API-запросы не кэшируем: сайт сам решает, к серверу или в localStorage.
   if (req.url.includes('/api/')) return;

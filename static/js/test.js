@@ -630,6 +630,22 @@ function setButtons() {
 /*  Финал                                                       */
 /* ------------------------------------------------------------ */
 
+function trackAttempt(r) {
+  const online = window.LoviRitmOnline;
+  if (!online?.trackAttempt) return;
+
+  online.trackAttempt({
+    name: null,
+    score: r.total,
+    dev: r.absAvg,
+    taps: r.hit,
+    mode: state.input === 'voice' ? 'voice' : 'tap',
+    beats: r.rows.map((row) => (
+      row.dev == null ? null : Math.round(row.dev * 1000) / 1000
+    )),
+  }).catch(() => {});
+}
+
 function finish() {
   clearResume();
   stopTimers();
@@ -637,6 +653,7 @@ function finish() {
   if (window.MicInput) MicInput.disable();
   state.mode = 'done';
 
+  trackAttempt(computeResults());
   renderResults();
   showScreen('results');
   setButtons();
