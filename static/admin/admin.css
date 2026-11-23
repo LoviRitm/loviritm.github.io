@@ -583,6 +583,94 @@ tbody tr:last-child td {
   padding: 20px;
 }
 
+.detail-summary {
+  margin: 12px 0 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.beat-chart-wrap {
+  margin: 10px 0 20px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #0a101b;
+}
+
+.beat-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.beat-grid {
+  stroke: rgba(148, 163, 184, 0.12);
+  stroke-width: 1;
+}
+
+.beat-zero {
+  stroke: rgba(148, 163, 184, 0.5);
+  stroke-width: 1.2;
+}
+
+.beat-bar {
+  opacity: 0.9;
+}
+
+.beat-bar--late {
+  fill: #fbbf24;
+}
+
+.beat-bar--early {
+  fill: #22d3ee;
+}
+
+.beat-line {
+  stroke: #c4b5fd;
+  stroke-width: 1.5;
+  opacity: 0.75;
+}
+
+.beat-dot {
+  fill: #f8fafc;
+}
+
+.beat-label {
+  fill: #94a3b8;
+  font-family: "Montserrat", system-ui, sans-serif;
+  font-size: 10px;
+}
+
+.beat-legend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.beat-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.beat-legend i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+}
+
+.beat-legend__early {
+  background: #22d3ee;
+}
+
+.beat-legend__late {
+  background: #fbbf24;
+}
+
 .beats {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));

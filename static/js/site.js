@@ -207,40 +207,6 @@ const ScoreStore = {
 window.ScoreStore = ScoreStore;
 
 let items = [];
-let average = 0;
-
-const MODE_LABELS = { tap: 'Тапами', voice: 'Голосом' };
-
-function modeTag(mode) {
-  const label = MODE_LABELS[mode];
-  return label ? `<span class="tag tag--${mode}">${label}</span>` : '—';
-}
-
-function rankOf(score) {
-  if (score >= 950) return 'Идеальный метроном';
-  if (score >= 850) return 'Стальные нервы';
-  if (score >= 700) return 'Твёрдый грув';
-  if (score >= 550) return 'Чувство есть';
-  if (score >= 350) return 'Нащупываете';
-  return 'Пока мимо';
-}
-
-/* ---------------- статистика ---------------- */
-
-async function loadStats() {
-  const nodes = $$('[data-stat]');
-  if (!nodes.length) return;
-
-  try {
-    const data = await ScoreStore.stats();
-    average = Number(data.average) || 0;
-    nodes.forEach((el) => {
-      el.textContent = String(Math.round(Number(data[el.dataset.stat]) || 0));
-    });
-  } catch {
-    nodes.forEach((el) => { el.textContent = '—'; });
-  }
-}
 
 /* ---------------- таблица рекордов ---------------- */
 
@@ -263,7 +229,7 @@ async function loadRecordsPage() {
 
     if (!items.length) {
       body.innerHTML = `
-        <tr><td colspan="7">
+        <tr><td colspan="3">
           Пока пусто. <a href="/">Пройдите тест</a> и займите первое место.
         </td></tr>`;
       return;
@@ -271,16 +237,9 @@ async function loadRecordsPage() {
 
     body.innerHTML = items.map((item, i) => `
       <tr>
-        <td>${i + 1}</td>
-        <td>
-          <button type="button" class="player-link" data-index="${i}"
-                  title="Подробный результат">${escapeHtml(item.name)}</button>
-        </td>
-        <td>${modeTag(item.mode)}</td>
-        <td class="num"><b>${Math.round(Number(item.score) || 0)}</b></td>
-        <td class="num">${item.dev != null ? `±${Number(item.dev).toFixed(1)} мс` : '—'}</td>
-        <td class="num">${item.taps != null ? item.taps : '—'}</td>
-        <td class="num">${escapeHtml(item.when || '')}</td>
+        <td><span class="rank-badge${i < 3 ? ' rank-badge--top' : ''}">${i + 1}</span></td>
+        <td class="rating-name">${escapeHtml(item.name || 'Аноним')}</td>
+        <td class="rating-date">${escapeHtml(recordDate(item))}</td>
       </tr>`).join('');
   } catch {
     const source = $('#recordsSource');
@@ -289,81 +248,20 @@ async function loadRecordsPage() {
       source.textContent = 'Онлайн-рейтинг сейчас недоступен. Попробуйте обновить страницу позже.';
     }
     body.innerHTML = `
-      <tr><td colspan="7">Не удалось загрузить таблицу. Проверьте подключение к интернету.</td></tr>`;
+      <tr><td colspan="3">Не удалось загрузить таблицу. Проверьте подключение к интернету.</td></tr>`;
   }
 }
 
-/* ---------------- карточка игрока ---------------- */
-
-function dateOf(item) {
-  const parts = [];
-  if (item.when) parts.push(item.when);
+function recordDate(item) {
+  if (item.when) return item.when;
   if (item.ts) {
-    const d = new Date(Number(item.ts) * 1000);
-    if (!Number.isNaN(d.getTime())) {
-      parts.push(d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }));
+    const date = new Date(Number(item.ts) * 1000);
+    if (!Number.isNaN(date.getTime())) {
+      return date.toLocaleDateString('ru-RU');
     }
   }
-  return parts.length ? parts.join(' · ') : 'дата не указана';
+  return '—';
 }
-
-function openPlayer(index) {
-  const item = items[index];
-  if (!item) return;
-
-  const score = Math.round(Number(item.score) || 0);
-  const diff = Math.round(score - average);
-  const modeLabel = MODE_LABELS[item.mode] || '';
-
-  $('#pmName').textContent = item.name || 'Аноним';
-
-  const pmMode = $('#pmMode');
-  pmMode.textContent = modeLabel;
-  pmMode.className = 'tag' + (modeLabel ? ` tag--${item.mode}` : '');
-  pmMode.hidden = !modeLabel;
-
-  $('#pmScore').textContent = String(score);
-  $('#pmRank').textContent = rankOf(score);
-  $('#pmDev').textContent = item.dev != null ? `±${Number(item.dev).toFixed(1)} мс` : '—';
-  $('#pmTaps').textContent = item.taps != null ? `${item.taps} / 20` : '—';
-  $('#pmPlace').textContent = `#${index + 1}`;
-  $('#pmVs').textContent = average ? `${diff >= 0 ? '+' : ''}${diff}` : '—';
-  $('#pmDate').textContent = dateOf(item);
-
-  const beats = Array.isArray(item.beats) ? item.beats : [];
-  const hasChart = beats.length > 0;
-  $('#pmChart').hidden = !hasChart;
-  $('#pmNoChart').hidden = hasChart;
-  if (hasChart) {
-    window.RhythmChart.render($('#pmChart'), window.RhythmChart.rowsFromBeats(beats));
-  } else {
-    $('#pmChart').innerHTML = '';
-  }
-
-  $('#playerModal').hidden = false;
-  document.body.style.overflow = 'hidden';
-}
-
-function closePlayer() {
-  const modal = $('#playerModal');
-  if (!modal) return;
-  modal.hidden = true;
-  document.body.style.overflow = '';
-}
-
-document.addEventListener('click', (ev) => {
-  const btn = ev.target.closest('.player-link');
-  if (btn) {
-    openPlayer(Number(btn.dataset.index));
-    return;
-  }
-  if (ev.target.closest('[data-close]')) closePlayer();
-});
-
-document.addEventListener('keydown', (ev) => {
-  const modal = $('#playerModal');
-  if (ev.key === 'Escape' && modal && !modal.hidden) closePlayer();
-});
 
 /* ---------------- график по ударам (общий) ---------------- */
 
@@ -500,7 +398,6 @@ if ('serviceWorker' in navigator && !IS_APP) {
 /* ---------------- старт ---------------- */
 
 document.addEventListener('DOMContentLoaded', () => {
-  loadStats();
   loadRecordsPage();
 });
 

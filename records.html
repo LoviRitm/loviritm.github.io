@@ -36,7 +36,7 @@
   <meta name="twitter:image:alt" content="Лови Ритм — проверьте чувство ритма">
 
   <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://loviritm.github.io/#website","url":"https://loviritm.github.io/","name":"Лови Ритм","description":"Онлайн-тест чувства ритма: тапами или голосом.","inLanguage":"ru-RU"},{"@type":"WebPage","@id":"https://loviritm.github.io/records.html#webpage","url":"https://loviritm.github.io/records.html","name":"Таблица рекордов — Лови Ритм","description":"Лучшие результаты теста чувства ритма.","isPartOf":{"@id":"https://loviritm.github.io/#website"},"inLanguage":"ru-RU"}]}</script>
-  <link rel="stylesheet" href="/static/css/app.css?v=46">
+  <link rel="stylesheet" href="/static/css/app.css?v=48">
   
 </head>
 <body data-page="records">
@@ -62,62 +62,27 @@
     <p class="pill">Таблица рекордов</p>
     <h1 class="hero hero--small">Лучшие результаты</h1>
     <p class="lead lead--small">
-      Общая таблица всех игроков. Все сохранённые попытки. «Ошибка» — средний промах по времени:
-      чем меньше, тем ровнее был темп.
+      Общий рейтинг игроков. Чем выше место, тем лучше результат.
     </p>
     <p id="recordsSource" class="hint" hidden></p>
 
-    <div class="stats">
-      <div class="stat"><b data-stat="count">—</b><span>попыток</span></div>
-      <div class="stat"><b data-stat="best">—</b><span>лучший балл</span></div>
-      <div class="stat"><b data-stat="average">—</b><span>средний балл</span></div>
-    </div>
-
     <div class="table-card">
-      <table class="table">
+      <table class="table table--rating">
         <thead>
           <tr>
-            <th>#</th><th>Имя</th><th>Режим</th><th class="num">Баллы</th>
-            <th class="num">Ошибка</th><th class="num">Удары</th><th class="num">Дата</th>
+            <th>#</th><th>Игрок</th><th>Дата</th>
           </tr>
         </thead>
         <tbody id="recordsBody">
-          <tr><td colspan="7">Загрузка…</td></tr>
+          <tr><td colspan="3">Загрузка…</td></tr>
         </tbody>
       </table>
     </div>
-
-    <p class="hint">Нажмите на имя игрока, чтобы посмотреть его подробный результат.</p>
 
     <div class="actions">
       <a class="btn btn--big" href="/">Пройти тест</a>
     </div>
   </section>
-</div>
-
-<!-- Карточка игрока -->
-<div id="playerModal" class="modal" hidden>
-  <div class="modal__backdrop" data-close></div>
-  <div class="modal__card" role="dialog" aria-modal="true" aria-labelledby="pmName">
-    <button type="button" class="modal__close" data-close aria-label="Закрыть">×</button>
-    <p class="pill">Результат игрока</p>
-    <h2 id="pmName" class="modal__name"></h2>
-    <span id="pmMode" class="tag" hidden></span>
-    <div class="score score--modal">
-      <span id="pmScore" class="score__num">0</span>
-      <span class="score__max">из 1000</span>
-    </div>
-    <p id="pmRank" class="rank"></p>
-    <div class="stats">
-      <div class="stat"><b id="pmDev">—</b><span>средняя ошибка</span></div>
-      <div class="stat"><b id="pmTaps">—</b><span>зачётных ударов</span></div>
-      <div class="stat"><b id="pmPlace">—</b><span>место в таблице</span></div>
-      <div class="stat"><b id="pmVs">—</b><span>к среднему баллу</span></div>
-    </div>
-    <div id="pmChart" class="chart" hidden></div>
-    <p id="pmNoChart" class="notice" hidden>Подробный график для этой попытки не сохранён.</p>
-    <p id="pmDate" class="notice"></p>
-  </div>
 </div>
 </main>
   </div>
@@ -146,7 +111,7 @@
 
   <script src="/static/js/online.js?v=2" defer></script>
   <script src="/static/js/analytics.js?v=1" defer></script>
-  <script src="/static/js/site.js?v=9" defer></script>
+  <script src="/static/js/site.js?v=10" defer></script>
   <script src="/static/js/feedback.js?v=5" defer></script>
   
 </body>

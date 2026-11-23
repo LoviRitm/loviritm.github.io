@@ -464,7 +464,7 @@
           <td class="num">${esc(row.taps)} / 20</td>
           <td title="${esc(row.player_id || '')}">${esc(shortId(row.player_id))}</td>
           <td>
-            <button class="link-btn" type="button" data-detail="${esc(row.id)}" data-kind="${esc(state.tab)}">Детали</button>
+            <button class="link-btn" type="button" data-detail="${esc(row.id)}" data-kind="${esc(state.tab)}">График</button>
             <button class="link-btn link-btn--danger" type="button" data-delete="${esc(row.id)}" data-kind="${esc(state.tab)}">Удалить</button>
           </td>
         </tr>
@@ -480,11 +480,121 @@
     return state.rows.find((row) => String(row.id) === String(id)) || null;
   }
 
+  function beatSummary(beats) {
+    const devs = (Array.isArray(beats) ? beats : [])
+      .map((value) => (value == null ? null : Number(value)))
+      .filter((value) => value != null && Number.isFinite(value));
+
+    if (!devs.length) return null;
+
+    const avgAbs = devs.reduce((sum, value) => sum + Math.abs(value), 0) / devs.length;
+    const bias = devs.reduce((sum, value) => sum + value, 0) / devs.length;
+    const variance = devs.reduce((sum, value) => sum + (value - bias) ** 2, 0) / devs.length;
+    return {
+      avgAbs,
+      bias,
+      spread: Math.sqrt(variance),
+      count: devs.length,
+    };
+  }
+
+  function renderBeatChart(beats) {
+    const values = (Array.isArray(beats) ? beats : [])
+      .slice(0, 20)
+      .map((value) => (value == null ? null : Number(value)));
+
+    if (!values.length) {
+      return '<p class="empty">График для этой попытки недоступен.</p>';
+    }
+
+    const width = 820;
+    const height = 300;
+    const pad = { left: 52, right: 18, top: 24, bottom: 46 };
+    const innerW = width - pad.left - pad.right;
+    const innerH = height - pad.top - pad.bottom;
+    const finite = values.filter((value) => value != null && Number.isFinite(value));
+    const maxAbs = Math.max(50, ...finite.map((value) => Math.abs(value)));
+    const limit = Math.ceil(maxAbs / 25) * 25;
+    const zeroY = pad.top + innerH / 2;
+    const stepX = innerW / values.length;
+    const barW = Math.max(4, stepX * 0.55);
+
+    const y = (value) => zeroY - (value / limit) * (innerH / 2);
+    const x = (index) => pad.left + stepX * index + stepX / 2;
+
+    const grid = [-1, -0.5, 0, 0.5, 1].map((factor) => {
+      const gy = zeroY - factor * (innerH / 2);
+      const cls = factor === 0 ? 'beat-zero' : 'beat-grid';
+      return `<line x1="${pad.left}" y1="${gy}" x2="${width - pad.right}" y2="${gy}" class="${cls}"/>`;
+    }).join('');
+
+    const yLabels = [-1, -0.5, 0, 0.5, 1].map((factor) => {
+      const gy = zeroY - factor * (innerH / 2);
+      const text = factor === 0 ? '0' : `${factor > 0 ? '+' : ''}${Math.round(limit * factor)}`;
+      return `<text x="${pad.left - 9}" y="${gy + 4}" text-anchor="end" class="beat-label">${text}</text>`;
+    }).join('');
+
+    const bars = values.map((value, index) => {
+      const bx = x(index);
+      if (value == null || !Number.isFinite(value)) {
+        return `<text x="${bx}" y="${zeroY + 4}" text-anchor="middle" class="beat-label">—</text>`;
+      }
+
+      const by = y(value);
+      const top = Math.min(zeroY, by);
+      const barH = Math.max(1.5, Math.abs(by - zeroY));
+      const cls = value >= 0 ? 'beat-bar beat-bar--late' : 'beat-bar beat-bar--early';
+      const sign = value >= 0 ? '+' : '';
+      return `<rect x="${bx - barW / 2}" y="${top}" width="${barW}" height="${barH}" rx="2" class="${cls}"><title>Удар ${index + 1}: ${sign}${value.toFixed(1)} мс</title></rect>`;
+    }).join('');
+
+    const pointList = values.map((value, index) => (
+      value == null || !Number.isFinite(value) ? null : `${x(index)},${y(value)}`
+    )).filter(Boolean).join(' ');
+
+    const line = pointList
+      ? `<polyline points="${pointList}" class="beat-line" fill="none"/>`
+      : '';
+
+    const dots = values.map((value, index) => (
+      value == null || !Number.isFinite(value)
+        ? ''
+        : `<circle cx="${x(index)}" cy="${y(value)}" r="2.6" class="beat-dot"/>`
+    )).join('');
+
+    const xLabels = values.map((_, index) => (
+      `<text x="${x(index)}" y="${height - 20}" text-anchor="middle" class="beat-label">${index + 1}</text>`
+    )).join('');
+
+    return `
+      <div class="beat-chart-wrap">
+        <div class="beat-legend">
+          <span><i class="beat-legend__early"></i> раньше</span>
+          <span><i class="beat-legend__late"></i> позже</span>
+          <span class="muted">мс</span>
+        </div>
+        <svg class="beat-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="График отклонений по ударам">
+          ${grid}
+          ${yLabels}
+          ${bars}
+          ${line}
+          ${dots}
+          ${xLabels}
+        </svg>
+      </div>
+    `;
+  }
+
   function openDetail(kind, id) {
     const row = findRow(kind, id);
     if (!row) return;
 
     const beats = Array.isArray(row.beats) ? row.beats : [];
+    const summary = beatSummary(beats);
+    const summaryLine = summary
+      ? `Средняя ошибка: ±${summary.avgAbs.toFixed(1)} мс · Смещение: ${summary.bias >= 0 ? '+' : ''}${summary.bias.toFixed(1)} мс · Разброс: ±${summary.spread.toFixed(1)} мс`
+      : 'Числовые отклонения по ударам не сохранены.';
+
     $('detailTitle').textContent = `${row.name || 'Аноним'} — ${row.score} из 1000`;
     $('detailBody').innerHTML = `
       <div class="cards" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:18px">
@@ -493,6 +603,9 @@
         <article class="card"><p class="card__label">Удары</p><p class="card__value" style="font-size:20px">${esc(row.taps)} / 20</p></article>
       </div>
       <p class="muted">Дата: ${esc(fmtDate(row.created_at))} · Игрок: ${esc(row.player_id || '—')}</p>
+      <p class="detail-summary">${esc(summaryLine)}</p>
+      <h3>График отклонений</h3>
+      ${renderBeatChart(beats)}
       <h3>Отклонения по ударам</h3>
       <div class="beats">
         ${beats.map((value, index) => `
