@@ -19,6 +19,63 @@ const escapeHtml = (value) =>
     { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]
   ));
 
+/* ---------------- антимат для имени ---------------- */
+
+const LATIN_TO_CYR = {
+  a: 'а', e: 'е', o: 'о', p: 'р', c: 'с',
+  x: 'х', y: 'у', u: 'у', k: 'к', m: 'м', t: 'т', b: 'в',
+};
+
+const PROFANITY_RE = /(хуй|хуя|хую|хуе|хуи|пизд|бляд|блят|еба[лт]|ебал|ебуч|заеб|наеб|отъеб|уеб|съеб|мудак|мудил|пидор|пидар|гандон|гондон|дроч|залуп|шлюх|говн|дерьм|жоп|сука|суки|сук[аи]|минж|срак|проститут|fuck|bitch|cunt|pussy|asshole|bastard|whore|slut|nigg|faggot)/i;
+
+function profanityNormalize(value, atChar = 'a') {
+  return String(value || '')
+    .toLowerCase()
+    .replace(/ё/g, 'е')
+    .replace(/@/g, atChar)
+    .replace(/0/g, 'o')
+    .replace(/1/g, 'i')
+    .replace(/3/g, 'e')
+    .replace(/4/g, 'a')
+    .replace(/\$/g, 's')
+    .replace(/!/g, 'i')
+    .replace(/6/g, 'б')
+    .replace(/[^a-zа-я0-9]+/g, '');
+}
+
+function hasProfanity(value) {
+  const original = String(value || '').toLowerCase().replace(/ё/g, 'е');
+  // Отдельное слово «бля» ловим до удаления пробелов, чтобы не задеть «бляха».
+  if (/(^|[^a-zа-я])бля([^a-zа-я]|$)/i.test(original)) return true;
+
+  const raw = profanityNormalize(value);
+  const alt = profanityNormalize(value, 'u');
+  if (!raw && !alt) return false;
+
+  const cyr = raw.replace(/[aeopcxykmtbu]/g, (ch) => LATIN_TO_CYR[ch] || ch);
+  const cyrAlt = alt.replace(/[aeopcxykmtbu]/g, (ch) => LATIN_TO_CYR[ch] || ch);
+
+  return (
+    PROFANITY_RE.test(raw)
+    || PROFANITY_RE.test(alt)
+    || PROFANITY_RE.test(cyr)
+    || PROFANITY_RE.test(cyrAlt)
+    || /^бля+$/.test(raw)
+    || /^бля+$/.test(alt)
+  );
+}
+
+window.NameGuard = {
+  isClean(value) {
+    return !hasProfanity(value);
+  },
+  check(value) {
+    return hasProfanity(value)
+      ? { ok: false, message: 'Имя содержит недопустимые слова. Выберите другое.' }
+      : { ok: true };
+  },
+};
+
 const LS_KEY = 'loviritm.scores';
 // Для тестирования храним весь рейтинг, а не только первые 20.
 // 5000 — практический запас под лимит localStorage.
@@ -168,6 +225,14 @@ const ScoreStore = {
   },
 
   async save(entry) {
+    if (hasProfanity(entry.name)) {
+      return {
+        ok: false,
+        error: 'profane-name',
+        message: 'Имя содержит недопустимые слова. Выберите другое.',
+      };
+    }
+
     let result = null;
 
     if (!IS_APP) {

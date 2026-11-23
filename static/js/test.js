@@ -776,6 +776,14 @@ async function saveScore(ev) {
 
   const name = $('nameInput').value.trim() || 'Аноним';
 
+  const guard = window.NameGuard?.check(name);
+  if (guard && !guard.ok) {
+    $('saveMsg').classList.add('is-error');
+    $('saveMsg').textContent = guard.message;
+    $('nameInput').focus();
+    return;
+  }
+
   const r = computeResults();
   const btn = $('btnSave');
   btn.disabled = true;
@@ -797,13 +805,18 @@ async function saveScore(ev) {
 
   try {
     const res = await window.ScoreStore.save(entry);
-    if (!res.ok) throw new Error('save failed');
+    if (!res.ok) {
+      throw new Error(res.message || 'Не удалось сохранить.');
+    }
     $('saveMsg').textContent = res.online
       ? 'Сохранено! Результат в общем онлайн-рейтинге.'
       : 'Сохранено на устройстве. Онлайн-рейтинг сейчас недоступен.';
-  } catch {
+  } catch (err) {
+    const profane = /profane|недопустим/i.test(String(err?.message || ''));
     $('saveMsg').classList.add('is-error');
-    $('saveMsg').textContent = 'Не удалось сохранить.';
+    $('saveMsg').textContent = profane
+      ? 'Имя содержит недопустимые слова. Выберите другое.'
+      : 'Не удалось сохранить.';
     btn.disabled = false;
   }
 }
