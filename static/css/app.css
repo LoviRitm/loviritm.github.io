@@ -810,11 +810,6 @@ body[data-page="records"] main { padding-bottom: 96px; }
   font-weight: 700;
 }
 
-.table--rating .rating-result__max {
-  color: var(--muted);
-  font-size: 11px;
-}
-
 .table--rating .rating-date {
   color: var(--muted);
   white-space: nowrap;

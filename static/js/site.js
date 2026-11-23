@@ -239,7 +239,7 @@ async function loadRecordsPage() {
       <tr>
         <td><span class="rank-badge${i < 3 ? ' rank-badge--top' : ''}">${i + 1}</span></td>
         <td class="rating-name">${escapeHtml(item.name || 'Аноним')}</td>
-        <td class="num rating-result"><b>${Math.round(Number(item.score) || 0)}</b><span class="rating-result__max"> / 1000</span></td>
+        <td class="num rating-result"><b>${Math.round(Number(item.score) || 0)}</b></td>
         <td class="rating-date">${escapeHtml(recordDate(item))}</td>
       </tr>`).join('');
   } catch {
