@@ -244,6 +244,15 @@ select:focus {
   margin-bottom: 18px;
 }
 
+.panel--today {
+  border-color: rgba(34, 211, 238, 0.24);
+}
+
+.cards--today {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 0;
+}
+
 .card {
   padding: 18px;
   border: 1px solid var(--line);
@@ -697,6 +706,10 @@ tbody tr:last-child td {
   .cards {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+
+  .cards--today {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 760px) {
@@ -711,6 +724,7 @@ tbody tr:last-child td {
   }
 
   .cards,
+  .cards--today,
   .grid2 {
     grid-template-columns: 1fr;
   }

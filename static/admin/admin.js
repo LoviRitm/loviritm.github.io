@@ -20,6 +20,7 @@
     tab: 'attempts',
     filter: '',
     mode: '',
+    sort: 'date-desc',
   };
 
   const MODE_LABEL = { tap: 'Тапами', voice: 'Голосом' };
@@ -256,6 +257,7 @@
     try {
       const dashboard = await rpc('admin_dashboard', { p_days: state.range });
       state.dashboard = dashboard || {};
+      renderTodayCards();
       renderCards();
       renderDailyChart();
       renderModes();
@@ -344,6 +346,31 @@
       items: Array.from(groups.values()),
       note: byWeek ? 'По неделям' : 'По месяцам',
     };
+  }
+
+  function renderTodayCards() {
+    const daily = Array.isArray(state.dashboard?.daily) ? state.dashboard.daily : [];
+    const today = daily[daily.length - 1] || {};
+    const dateLabel = today.day
+      ? new Date(`${today.day}T00:00:00`).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })
+      : 'сегодня';
+
+    $('todayNote').textContent = dateLabel;
+
+    const cards = [
+      ['Посещения', today.visits, 'за сегодня'],
+      ['Посетители', today.visitors, 'уникальных'],
+      ['Тесты', today.tests, 'завершено'],
+      ['Рекорды', today.scores, 'сохранено'],
+    ];
+
+    $('todayCards').innerHTML = cards.map(([label, value, hint]) => `
+      <article class="card">
+        <p class="card__label">${esc(label)}</p>
+        <p class="card__value">${fmtNum(value)}</p>
+        <p class="card__hint">${esc(hint)}</p>
+      </article>
+    `).join('');
   }
 
   function renderDailyChart() {
@@ -435,8 +462,41 @@
     });
   }
 
-  function renderTable() {
+  function updateSortOptions() {
+    const visits = state.tab === 'visits';
+    document.querySelectorAll('#sortSelect option[data-score]').forEach((option) => {
+      option.disabled = visits;
+    });
+
+    if (visits && state.sort.startsWith('score')) {
+      state.sort = 'date-desc';
+      $('sortSelect').value = 'date-desc';
+    }
+  }
+
+  function visibleRows() {
     const rows = filteredRows();
+    const time = (row) => {
+      const value = new Date(row.created_at).getTime();
+      return Number.isNaN(value) ? 0 : value;
+    };
+
+    return [...rows].sort((a, b) => {
+      if (state.sort === 'score-asc') {
+        return (Number(a.score) || 0) - (Number(b.score) || 0) || time(b) - time(a);
+      }
+      if (state.sort === 'score-desc') {
+        return (Number(b.score) || 0) - (Number(a.score) || 0) || time(a) - time(b);
+      }
+      if (state.sort === 'date-asc') {
+        return time(a) - time(b);
+      }
+      return time(b) - time(a);
+    });
+  }
+
+  function renderTable() {
+    const rows = visibleRows();
     const head = $('tableHead');
     const body = $('tableBody');
 
@@ -633,7 +693,7 @@
   }
 
   function exportCsv() {
-    const rows = filteredRows();
+    const rows = visibleRows();
     if (!rows.length) return;
 
     const isVisits = state.tab === 'visits';
@@ -727,6 +787,7 @@
         const visits = state.tab === 'visits';
         $('modeFilter').disabled = visits;
         $('modeFilter').closest('.field').hidden = visits;
+        updateSortOptions();
         renderTable();
         try {
           await loadTable();
@@ -743,6 +804,11 @@
 
     $('modeFilter').addEventListener('change', () => {
       state.mode = $('modeFilter').value;
+      renderTable();
+    });
+
+    $('sortSelect').addEventListener('change', () => {
+      state.sort = $('sortSelect').value;
       renderTable();
     });
 

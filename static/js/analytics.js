@@ -13,7 +13,8 @@
     if (sent) return;
     sent = true;
 
-    if (location.pathname.startsWith('/admin')) return;
+    if (location.pathname === '/admin' || location.pathname.startsWith('/admin/')) return;
+    if (location.search.includes('no_analytics=1')) return;
 
     const online = window.LoviRitmOnline;
     if (!online?.trackPageView) return;

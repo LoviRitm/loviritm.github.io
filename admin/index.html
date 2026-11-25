@@ -6,7 +6,7 @@
   <meta name="robots" content="noindex, nofollow">
   <title>Админка — Лови Ритм</title>
   <link rel="icon" href="/favicon.ico" type="image/x-icon">
-  <link rel="stylesheet" href="/static/admin/admin.css?v=4">
+  <link rel="stylesheet" href="/static/admin/admin.css?v=5">
 </head>
 <body>
   <div id="loginView" class="auth">
@@ -62,7 +62,15 @@
 
       <p id="appMsg" class="msg" role="status"></p>
 
-      <section id="cards" class="cards" aria-label="Сводка"></section>
+      <section class="panel panel--today" aria-labelledby="todayTitle">
+        <div class="panel__head">
+          <h2 id="todayTitle">Сегодня</h2>
+          <span id="todayNote" class="muted"></span>
+        </div>
+        <div id="todayCards" class="cards cards--today"></div>
+      </section>
+
+      <section id="cards" class="cards" aria-label="Сводка за период"></section>
 
       <section class="panel">
         <div class="panel__head">
@@ -114,6 +122,15 @@
               <option value="voice">Голосом</option>
             </select>
           </label>
+          <label class="field field--inline">
+            <span>Сортировка</span>
+            <select id="sortSelect">
+              <option value="date-desc">Дата: сначала новые</option>
+              <option value="date-asc">Дата: сначала старые</option>
+              <option value="score-desc" data-score>Рейтинг: по убыванию</option>
+              <option value="score-asc" data-score>Рейтинг: по возрастанию</option>
+            </select>
+          </label>
           <button id="exportBtn" class="btn btn--ghost" type="button">Экспорт CSV</button>
         </div>
 
@@ -136,6 +153,6 @@
     <div id="detailBody" class="dialog__body"></div>
   </dialog>
 
-  <script src="/static/admin/admin.js?v=4" defer></script>
+  <script src="/static/admin/admin.js?v=5" defer></script>
 </body>
 </html>
