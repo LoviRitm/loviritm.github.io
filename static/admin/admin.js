@@ -10,7 +10,6 @@
   const SUPABASE_URL = 'https://ecjtmzrcxucosbpvocod.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVjanRtenJjeHVjb3NicHZvY29kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQzMzY0NTAsImV4cCI6MjEwOTkxMjQ1MH0.VVk47DJBk2OAm2kfD-vkguNj72QdA1oxmWhlAovce1Y';
   const SESSION_KEY = 'loviritm.adminSession';
-  const EXPIRY_KEY = 'loviritm.adminExpiresAt';
 
   const $ = (id) => document.getElementById(id);
   const state = {
@@ -22,7 +21,6 @@
     filter: '',
     mode: '',
     sort: 'date-desc',
-    expiryTimer: null,
   };
 
   const MODE_LABEL = { tap: 'Тапами', voice: 'Голосом' };
@@ -104,14 +102,9 @@
   }
 
   function clearSession() {
-    if (state.expiryTimer) {
-      clearTimeout(state.expiryTimer);
-      state.expiryTimer = null;
-    }
     state.session = null;
     try {
       localStorage.removeItem(SESSION_KEY);
-      sessionStorage.removeItem(EXPIRY_KEY);
     } catch {}
   }
 
@@ -210,20 +203,12 @@
     return api(`/rest/v1/rpc/${name}`, { method: 'POST', body });
   }
 
-  function isMissingFunctionError(err) {
-    return /PGRST202|schema cache|Could not find the function|function .* does not exist/i.test(String(err?.message || ''));
-  }
-
   async function signIn(email, password) {
     const data = await authRequest('/auth/v1/token?grant_type=password', { email, password });
     setSession(data);
   }
 
   async function signOut() {
-    try {
-      await rpc('admin_end_session');
-    } catch {}
-
     try {
       if (state.session?.access_token) {
         await fetch(`${SUPABASE_URL}/auth/v1/logout`, {
@@ -248,109 +233,12 @@
   function showApp() {
     $('loginView').hidden = true;
     $('appView').hidden = false;
-    $('loginMsg').textContent = '';
-    $('loginMsg').classList.remove('is-error');
     $('adminEmail').textContent = state.session?.user?.email || '';
   }
 
   async function checkAdmin() {
     const ok = await rpc('is_admin');
     return ok === true;
-  }
-
-  async function checkAdminSession() {
-    try {
-      const ok = await rpc('is_admin_session');
-      return ok === true;
-    } catch (err) {
-      if (isMissingFunctionError(err)) return checkAdmin();
-      throw err;
-    }
-  }
-
-  async function claimAdminSession() {
-    const previous = (() => {
-      try { return sessionStorage.getItem(EXPIRY_KEY); } catch { return null; }
-    })();
-
-    let result;
-    try {
-      result = await rpc('admin_claim_session', {
-        p_user_agent: String(navigator.userAgent || '').slice(0, 300),
-      });
-    } catch (err) {
-      if (!isMissingFunctionError(err)) throw err;
-      result = {
-        ok: true,
-        fallback: true,
-        expires_at: new Date(Date.now() + 2 * 3600 * 1000).toISOString(),
-      };
-    }
-
-    if (result?.ok && result.expires_at) {
-      const previousMs = previous ? new Date(previous).getTime() : NaN;
-      const keepPrevious = Number.isFinite(previousMs) && previousMs > Date.now();
-      const clientExpires = keepPrevious ? previous : result.expires_at;
-      result.client_expires_at = clientExpires;
-      try {
-        sessionStorage.setItem(EXPIRY_KEY, clientExpires);
-      } catch {}
-    }
-    return result;
-  }
-
-  async function resumeAdminSession() {
-    try {
-      return await rpc('admin_resume_session');
-    } catch (err) {
-      if (isMissingFunctionError(err)) {
-        const expires = sessionStorage.getItem(EXPIRY_KEY);
-        return expires
-          ? { ok: true, expires_at: expires, fallback: true, resumed: true }
-          : { ok: false };
-      }
-      throw err;
-    }
-  }
-
-  function detachAdminSession() {
-    if (!state.session?.access_token) return;
-
-    try {
-      fetch(`${SUPABASE_URL}/rest/v1/rpc/admin_end_session`, {
-        method: 'POST',
-        keepalive: true,
-        cache: 'no-store',
-        headers: {
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${state.session.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: '{}',
-      }).catch(() => {});
-    } catch {}
-  }
-
-  function scheduleSessionExpiry(expiresAt) {
-    if (state.expiryTimer) {
-      clearTimeout(state.expiryTimer);
-      state.expiryTimer = null;
-    }
-
-    const ms = new Date(expiresAt).getTime() - Date.now();
-    if (!Number.isFinite(ms) || ms <= 0) {
-      expireSession();
-      return;
-    }
-
-    state.expiryTimer = setTimeout(() => {
-      expireSession();
-    }, Math.min(ms, 2147483647));
-  }
-
-  async function expireSession() {
-    await signOut();
-    showLogin('Сессия администратора истекла. Войдите заново.');
   }
 
   function sinceIso() {
@@ -367,13 +255,7 @@
     setBusy(true);
     setMsg('Загрузка данных…');
     try {
-      let dashboard;
-      try {
-        dashboard = await rpc('admin_dashboard_session', { p_days: state.range });
-      } catch (err) {
-        if (!isMissingFunctionError(err)) throw err;
-        dashboard = await rpc('admin_dashboard', { p_days: state.range });
-      }
+      const dashboard = await rpc('admin_dashboard', { p_days: state.range });
       state.dashboard = dashboard || {};
       renderTodayCards();
       renderCards();
@@ -383,12 +265,7 @@
       await loadTable();
       setMsg('');
     } catch (err) {
-      const message = String(err?.message || '');
-      if (/forbidden|session|сессия/i.test(message)) {
-        await expireSession();
-        return;
-      }
-      setMsg(`Не удалось загрузить данные: ${message}`, true);
+      setMsg(`Не удалось загрузить данные: ${err.message}`, true);
     } finally {
       setBusy(false);
     }
@@ -811,10 +688,6 @@
       await api(`/rest/v1/${config.table}?id=eq.${encodeURIComponent(id)}`, { method: 'DELETE' });
       await loadAll();
     } catch (err) {
-      if (/forbidden|session|сессия/i.test(String(err?.message || ''))) {
-        await expireSession();
-        return;
-      }
       setMsg(`Не удалось удалить: ${err.message}`, true);
     }
   }
@@ -876,27 +749,8 @@
           showLogin('Пользователь вошёл, но не добавлен в admins. Выполните SQL из supabase/admin_schema.sql.');
           return;
         }
-
-        const claim = await claimAdminSession();
-        if (!claim?.ok) {
-          await signOut();
-          const until = claim?.expires_at
-            ? new Date(claim.expires_at).toLocaleString('ru-RU', {
-                day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
-              })
-            : '';
-          showLogin(until
-            ? `Уже есть активная сессия администратора до ${until}. Вход с другого браузера заблокирован.`
-            : 'Уже есть активная сессия администратора. Вход с другого браузера заблокирован.');
-          return;
-        }
-
-        scheduleSessionExpiry(claim.client_expires_at || claim.expires_at);
         showApp();
         await loadAll();
-        if (claim.fallback) {
-          setMsg('Выполните supabase/admin_session.sql, чтобы включить ограничение сессии на 2 часа.', true);
-        }
       } catch (err) {
         const text = err.message === 'Invalid login credentials'
           ? 'Неверный email или пароль.'
@@ -914,8 +768,6 @@
       await signOut();
       showLogin('');
     });
-
-    window.addEventListener('pagehide', detachAdminSession);
 
     $('refreshBtn').addEventListener('click', loadAll);
 
@@ -940,10 +792,6 @@
         try {
           await loadTable();
         } catch (err) {
-          if (/forbidden|session|сессия/i.test(String(err?.message || ''))) {
-            await expireSession();
-            return;
-          }
           setMsg(`Не удалось загрузить таблицу: ${err.message}`, true);
         }
       });
@@ -994,19 +842,6 @@
       return;
     }
 
-    const expiry = sessionStorage.getItem(EXPIRY_KEY);
-    if (!expiry) {
-      showLogin('Войдите заново. Сессия администратора привязана к вкладке.');
-      return;
-    }
-
-    const expiryMs = new Date(expiry).getTime();
-    if (!Number.isFinite(expiryMs) || expiryMs <= Date.now()) {
-      await signOut();
-      showLogin('Сессия администратора истекла. Войдите заново.');
-      return;
-    }
-
     try {
       showApp();
       const admin = await checkAdmin();
@@ -1015,21 +850,7 @@
         showLogin('Нет прав администратора. Добавьте пользователя в таблицу admins.');
         return;
       }
-
-      // Даём pagehide-запросу завершиться до повторного claim.
-      await new Promise((resolve) => setTimeout(resolve, 700));
-      const claim = await claimAdminSession();
-      if (!claim?.ok) {
-        await signOut();
-        showLogin('Активная сессия администратора уже открыта в другом браузере.');
-        return;
-      }
-
-      scheduleSessionExpiry(claim.client_expires_at || claim.expires_at || expiry);
       await loadAll();
-      if (claim.fallback) {
-        setMsg('Выполните supabase/admin_session.sql, чтобы включить ограничение сессии на 2 часа.', true);
-      }
     } catch (err) {
       await signOut();
       showLogin(`Не удалось проверить доступ: ${err.message}`);
